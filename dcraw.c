@@ -28,6 +28,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
 #define _USE_MATH_DEFINES
 #include <ctype.h>
 #include <errno.h>
@@ -42,7 +44,7 @@
 #include <time.h>
 #include <sys/types.h>
 
-#if defined(DJGPP) || defined(__MINGW32__)
+#if defined(DJGPP) || defined(__MINGW32__) || defined(WIN32) || defined(WIN64)
 #define fseeko fseek
 #define ftello ftell
 #else
@@ -66,6 +68,10 @@ typedef unsigned __int64 UINT64;
 #include <netinet/in.h>
 typedef long long INT64;
 typedef unsigned long long UINT64;
+#endif
+
+#if !defined(M_PI)
+#  define M_PI 3.14159265358979323846
 #endif
 
 #ifdef NODEPS
@@ -9013,7 +9019,7 @@ int CLASS main (int argc, const char **argv)
   int timestamp_only=0, thumbnail_only=0, identify_only=0;
   int user_qual=-1, user_black=-1, user_sat=-1, user_flip=-1;
   int use_fuji_rotate=1, write_to_stdout=0, read_from_stdin=0;
-  const char *sp, *bpfile=0, *dark_frame=0, *write_ext;
+  const char *sp, *bpfile=0, *outfile=0, *dark_frame=0, *write_ext;
   char opm, opt, *ofname, *cp;
   struct utimbuf ut;
 #ifndef NO_LCMS
@@ -9046,6 +9052,7 @@ int CLASS main (int argc, const char **argv)
     puts(_("-r <r g b g> Set custom white balance"));
     puts(_("+M/-M     Use/don't use an embedded color matrix"));
     puts(_("-C <r b>  Correct chromatic aberration"));
+    puts(_("-O <file> Write output to this file"));
     puts(_("-P <file> Fix the dead pixels listed in this file"));
     puts(_("-K <file> Subtract dark frame (16-bit raw PGM)"));
     puts(_("-k <num>  Set the darkness level"));
@@ -9114,6 +9121,7 @@ int CLASS main (int argc, const char **argv)
 #endif
 	break;
       case 'P':  bpfile     = argv[arg++];  break;
+      case 'O':  outfile    = argv[arg++];  break;
       case 'K':  dark_frame = argv[arg++];  break;
       case 'z':  timestamp_only    = 1;  break;
       case 'e':  thumbnail_only    = 1;  break;
@@ -9390,7 +9398,10 @@ thumbnail:
     if (write_to_stdout)
       strcpy (ofname,_("standard output"));
     else {
-      strcpy (ofname, ifname);
+      if (outfile)
+        strcpy (ofname,outfile);
+      else {
+        strcpy (ofname, ifname);
       if ((cp = strrchr (ofname, '.'))) *cp = 0;
       if (multi_out)
 	sprintf (ofname+strlen(ofname), "_%0*d",
@@ -9398,6 +9409,7 @@ thumbnail:
       if (thumbnail_only)
 	strcat (ofname, ".thumb");
       strcat (ofname, write_ext);
+      }
       ofp = fopen (ofname, "wb");
       if (!ofp) {
 	status = 1;
