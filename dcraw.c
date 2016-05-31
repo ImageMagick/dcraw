@@ -164,7 +164,6 @@ cl_command_queue commandQueue;
 cl_kernel ahdKernel;
 cl_kernel convertRGBKernel;
 cl_bool useCL = 0;
-cl_bool useCLColor = 0;
 cl_mem rawBuffer = NULL;
 cl_mem demoBuffer = NULL;
 cl_mem imageBuffer = NULL;
@@ -8753,7 +8752,7 @@ void CLASS convert_to_rgb()
 
   memset (histogram, 0, sizeof histogram);
 
-  if (!useCLColor) {
+  if (!useCL) {
     for (img=image[0], row=0; row < height; row++)
       for (col=0; col < width; col++, img+=4) {
         if (!raw_color) {
@@ -9448,22 +9447,6 @@ kernel void convert_rgb(global ushort4 *srcImage,
     atomic_inc(&histogram[2][(stage.s2) >> 3]);
   }
 }
-
-kernel void scale_colors(global ushort *image,
-  global const unsigned black[4],
-  global const float scale[4],
-  int width,
-  int height,
-  const uint filters
-)
-{
-  int x = get_global_id(0);
-  int y = get_global_id(1);
-  int fc = FC(x, y);
-
-  if (x < width && y < height)
-    image[x + y * width] = clipf((convert_float(image[x + y * width]) - convert_float(black[fc])) * scale[fc]);
-}
 );
 
 void CLASS ahd_interpolate_cl()
@@ -9525,7 +9508,6 @@ void CLASS ahd_interpolate_cl()
 
     status = clEnqueueNDRangeKernel(commandQueue, ahdKernel, 2, NULL, globalSize, localSize, 0, NULL, NULL);
     clFlush(commandQueue);
-    useCLColor = TRUE;
 
     clReleaseKernel(ahdKernel);
   }
@@ -9976,6 +9958,13 @@ next:
       image = (ushort (*)[4]) calloc (iheight, iwidth*sizeof *image);
       merror (image, "main()");
     }
+
+  useCL = (filters && !document_mode);
+  if ((quality == 0) ||
+      (quality == 1 || colors > 3) ||
+      (quality == 2 && filters > 1000) ||
+      (filters == 9))
+    useCL = FALSE;
 #pragma omp parallel sections num_threads(2)
   {
 #pragma omp section
@@ -9993,7 +9982,8 @@ next:
   } // end omp section
 #pragma omp section
   {
-    initCL();
+    if (useCL)
+      initCL();
     if (useCL) {
       cl_int status;
       buildKernels();
