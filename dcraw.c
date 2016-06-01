@@ -9959,12 +9959,6 @@ next:
       merror (image, "main()");
     }
 
-  useCL = (filters && !document_mode);
-  if ((quality == 0) ||
-      (quality == 1 || colors > 3) ||
-      (quality == 2 && filters > 1000) ||
-      (filters == 9))
-    useCL = FALSE;
 #pragma omp parallel sections num_threads(2)
   {
 #pragma omp section
@@ -9982,8 +9976,7 @@ next:
   } // end omp section
 #pragma omp section
   {
-    if (useCL)
-      initCL();
+    initCL();
     if (useCL) {
       cl_int status;
       buildKernels();
@@ -9999,6 +9992,14 @@ next:
       height = raw_height;
       width  = raw_width;
     }
+    quality = 2 + !fuji_width;
+    if (user_qual >= 0) quality = user_qual;
+    useCL = (filters && !document_mode);
+    if ((quality == 0) ||
+        (quality == 1 || colors > 3) ||
+        (quality == 2 && filters > 1000) ||
+        (filters == 9))
+      useCL = FALSE;
     iheight = (height + shrink) >> shrink;
     iwidth  = (width  + shrink) >> shrink;
     if (raw_image) {
@@ -10009,8 +10010,6 @@ next:
     if (zero_is_bad) remove_zeroes();
     bad_pixels (bpfile);
     if (dark_frame) subtract (dark_frame);
-    quality = 2 + !fuji_width;
-    if (user_qual >= 0) quality = user_qual;
     i = cblack[3];
     FORC3 if (i > cblack[c]) i = cblack[c];
     FORC4 cblack[c] -= i;
