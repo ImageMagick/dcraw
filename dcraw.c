@@ -8774,7 +8774,7 @@ void CLASS convert_to_rgb()
     size_t globalSize[1];
     size_t localSize[1];
     int i = 0;
-    cl_int size = height * width;
+    cl_int size = iheight * iwidth;
     cl_mem outcamBuffer = clCreateBuffer(context, CL_MEM_COPY_HOST_PTR, sizeof(out_cam), out_cam, &status);
     clSetKernelArg(convertRGBKernel, i++, sizeof(cl_mem), &demoBuffer);
     clSetKernelArg(convertRGBKernel, i++, sizeof(cl_mem), &imageBuffer);
@@ -8786,6 +8786,10 @@ void CLASS convert_to_rgb()
     globalSize[0] = ((size + localSize[0] - 1) / localSize[0]) * localSize[0];
 
     (void) clEnqueueNDRangeKernel(commandQueue, convertRGBKernel, 1, NULL, globalSize, localSize, 0, NULL, NULL);
+    void *b = clEnqueueMapBuffer(commandQueue, imageBuffer, CL_FALSE, CL_MAP_READ, 0, size * sizeof(*image), 0, NULL, NULL, status);
+    clEnqueueUnmapMemObject(commandQueue, imageBuffer, b, 0, NULL, NULL);
+    b = clEnqueueMapBuffer(commandQueue, histoBuffer, CL_FALSE, CL_MAP_READ, 0, sizeof(histogram), 0, NULL, NULL, status);
+    clEnqueueUnmapMemObject(commandQueue, histoBuffer, b, 0, NULL, NULL);
     clReleaseMemObject(outcamBuffer);
     clReleaseMemObject(histoBuffer);
     clReleaseMemObject(demoBuffer);
