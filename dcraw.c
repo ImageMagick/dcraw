@@ -10817,7 +10817,7 @@ next:
     }
     quality = 2 + !fuji_width;
     if (user_qual >= 0) quality = user_qual;
-    useCL = (filters && !document_mode);
+    useCL = useCL && (filters && !document_mode);
     if ((quality == 0) ||
         (quality == 1 || colors > 3) ||
         (quality == 2 && filters > 1000) ||
