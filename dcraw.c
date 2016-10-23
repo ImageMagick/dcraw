@@ -9957,9 +9957,9 @@ kernel void ahd_interpolate(global ushort *image,
     while (offset < srcRowPixels * srcRowPixels) {
       int xx = x + (offset % srcRowPixels);
       int yy = y + (offset / srcRowPixels);
-      xx = (xx < 0) ? --xx : xx;
+      xx = (xx < 0) ? -xx : xx;
       xx = (xx >= rawWidth) ? 2 * rawWidth - xx - 1 : xx;
-      yy = (yy < 0) ? --yy : yy;
+      yy = (yy < 0) ? -yy : yy;
       yy = (yy >= rawHeight) ? 2 * rawHeight - yy - 1 : yy;
       int fc = FC(xx - left, yy - top);
       src[offset] = clipf((convert_float(image[xx + yy * rawWidth]) - convert_float(black[fc])) * scale[fc]);
