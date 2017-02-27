@@ -10805,7 +10805,6 @@ next:
       cl_int status;
       buildKernels();
       demoBuffer = clCreateBuffer(context, 0, (iheight * iwidth * sizeof *image), NULL, &status);
-      rawBuffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, (raw_height * raw_width * sizeof(*raw_image)), raw_image, &status);
       histoBuffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, sizeof(histogram), histogram, &status);
     }
   }
@@ -10823,6 +10822,8 @@ next:
         (quality == 2 && filters > 1000) ||
         (filters == 9))
       useCL = FALSE;
+    if (useCL)
+      rawBuffer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, (raw_height * raw_width * sizeof(*raw_image)), raw_image, &status);
     iheight = (height + shrink) >> shrink;
     iwidth  = (width  + shrink) >> shrink;
     if (raw_image) {
