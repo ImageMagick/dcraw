@@ -10892,7 +10892,7 @@ thumbnail:
       write_ext = ".tiff";
     else
       write_ext = ".pgm\0.ppm\0.ppm\0.pam" + colors*5-5;
-    ofname = (char *) malloc (strlen(ifname) + 64);
+    ofname = (char *) malloc (strlen(outfile ? outfile : ifname) + 64);
     merror (ofname, "main()");
     if (write_to_stdout)
       strcpy (ofname,_("standard output"));
