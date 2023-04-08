@@ -10207,7 +10207,7 @@ kernel void ahd_interpolate(global ushort *image,
       xx = (xx >= rawWidth) ? 2 * rawWidth - xx - 1 : xx;
       yy = (yy < 0) ? -yy : yy;
       yy = (yy >= rawHeight) ? 2 * rawHeight - yy - 1 : yy;
-      int fc = FC(xx - left, yy - top);
+      int fc = FC(yy - top, xx - left);
       src[offset] = clipf((convert_float(image[xx + yy * rawWidth]) - convert_float(black[fc])) * scale[fc]);
       offset += 256;
     }
@@ -10234,8 +10234,8 @@ kernel void ahd_interpolate(global ushort *image,
   int x = get_group_id(0) * (tileSize - 2 * pad) + get_global_offset(0) + lx - pad;
   int y = get_group_id(1) * (tileSize - 2 * pad) + get_global_offset(1) + ly - pad;
 
-  int fc = FC(x, y);
-  fc = (fc == 1) ? fc + FC(x + 1, y) : fc;
+  int fc = FC(y, x);
+  fc = (fc == 1) ? fc + FC(y, x + 1) : fc;
 
   const int sp = (lx + 2) + (ly + 2) * srcRowPixels;
   const int tp = lx + ly * rowPixels;
