@@ -1,0 +1,17 @@
+[EXE]
+
+[OPTIONAL]
+
+[DEFINES]
+NO_LCMS
+
+[DIRECTORIES]
+.
+
+[INCLUDES]
+jasper->src\libjasper\include
+jpeg-turbo->.
+
+[DEPENDENCIES]
+jasper
+jpeg-turbo
