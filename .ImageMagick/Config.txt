@@ -10,7 +10,7 @@ NO_LCMS
 .
 
 [INCLUDES]
-jpeg-turbo->.
+jpeg-turbo->src
 
 [DEPENDENCIES]
 jpeg-turbo
