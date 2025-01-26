@@ -10921,6 +10921,9 @@ int CLASS main (int argc, const char **argv)
       if ((status = !thumb_offset)) {
 	fprintf (stderr,_("%s has no thumbnail.\n"), ifname);
 	goto next;
+      } else if ((status = !((int)thumb_length > 0x7f)) {
+	fprintf (stderr,_("%s has invalid thumbnail.\n"), ifname);
+	goto next;
       } else if (thumb_load_raw) {
 	load_raw = thumb_load_raw;
 	data_offset = thumb_offset;
